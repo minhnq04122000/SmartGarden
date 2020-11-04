@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "944882709293",
+    "firebase_url": "https://demorn-975d4.firebaseio.com",
+    "project_id": "demorn-975d4",
+    "storage_bucket": "demorn-975d4.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:944882709293:android:324e6c3f526c23003259a4",
+        "android_client_info": {
+          "package_name": "com.smartgarden"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "944882709293-ukn0tacuejvmd5g9vv3fijqojku17aeq.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.smartgarden",
+            "certificate_hash": "88af457ebec2c8cb68588ef71d3b46aad8fefedb"
+          }
+        },
+        {
+          "client_id": "944882709293-cb5v2kojae4in1rmin7m40jpcaarc97n.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDaioy1MwgyNm6KHgh3lWw_L4RrDfq45Ls"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "944882709293-cb5v2kojae4in1rmin7m40jpcaarc97n.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
