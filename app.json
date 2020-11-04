@@ -1,0 +1,12 @@
+{
+  "name": "SmartGarden",
+  "displayName": "SmartGarden",
+  "expo": {
+    "name": "SmartGarden",
+    "slug": "SmartGarden",
+    "version": "1.0.0",
+    "assetBundlePatterns": [
+      "**/*"
+    ]
+  }
+}
