@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { View, StyleSheet, TextInput, ImageBackground, Image } from 'react-native';
+import React, { Component, useState } from 'react';
+import { View, StyleSheet, TextInput, ImageBackground, Image, Alert } from 'react-native';
 import {
     Header,
     Container,
@@ -16,79 +16,93 @@ import {
 import { firebaseApp } from '../components/FirebaseConfig.js'
 
 
-export default function ResScreen({ navigation }) {
-    const [email, setEmail] = useState('')
-    const [password, setPassword] = useState('')
-    const [confirmPassword, setConfirmPassword] = useState('')
-
-    const onRegisterPress = () => {
-        if (password !== confirmPassword) {
+class ResScreen extends Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            email: '',
+            password: '',
+            confirmPassword: ''
+        }
+    }
+    onRegisterPress() {
+        if (this.state.password !== this.state.confirmPassword) {
             alert("Passwords don't match.")
             return
         }
         firebaseApp
             .auth()
-            .createUserWithEmailAndPassword(email, password)
-            .then((response) => {
-                const uid = response.user.uid
-                const data = {
-                    id: uid,
-                    email,
-                };
-                const usersRef = firebaseApp.firestore().collection('users')
-                usersRef
-                    .doc(uid)
-                    .set(data)
-                    .then(() => {
-                        navigation.navigate('Home', { user: data })
-                    })
-                    .catch((error) => {
-                        alert(error)
-                    });
-            })     
-            .catch((error) => {
-                alert(error)
+            .createUserWithEmailAndPassword(this.state.email, this.state.password)
+            .then(() => {
+                Alert.alert(
+                    'Thông Báo',
+                    'Đăng Ký Thành Công Email : ' + this.state.email,
+                    [
+                        { text: 'Cancel', onPress: () => console.log('Cancel Pressed'), style: 'cancel' },
+                        { text: 'OK', onPress: () => this.props.navigation.navigate("Login") },
+                    ],
+                    { cancellabel: false }
+                )
+                this.setState({
+                    email: '',
+                    password: ''
+                })
+            })
+            .catch(function (error) {
+                Alert.alert(
+                    'Thông Báo',
+                    'Đăng Ký Thất Bại ! ',
+                    [
+                        { text: 'Cancel', onPress: () => console.log('Cancel Pressed'), style: 'cancel' },
+                        { text: 'OK', onPress: () => console.log('Cancel Pressed'), style: 'cancel' },
+                    ],
+                    { cancellabel: false }
+                )
             });
+
+
     }
-    return (
-        <View style={styles.container}>
-            <View>
-                <Image source={require('../assets/background/home_header.png')}>
-                </Image>
-            </View>
-            <View>
-                <Text>Tài Khoản : </Text>
-                <TextInput
-                    style={{ height: 40, width: 300, borderColor: 'gray', borderWidth: 1, borderRadius: 10, margin: 10 }}
-                    onChangeText={(text) => setEmail(text)}
-                    value={email}
-                />
-                <Text>Mật Khẩu : </Text>
-                <TextInput
-                    style={{ height: 40, width: 300, borderColor: 'gray', borderWidth: 1, borderRadius: 10, margin: 10 }}
-                    onChangeText={(text) => setPassword(text)}
-                    value={password}
-                />
-                <Text>Nhập Lại Mật Khẩu : </Text>
-                <TextInput
-                    style={{ height: 40, width: 300, borderColor: 'gray', borderWidth: 1, borderRadius: 10, margin: 10 }}
-                    onChangeText={(text) => setConfirmPassword(text)}
-                    value={confirmPassword}
-                />
-            </View>
-            <View style={{ alignItems: 'center' }}>
-                <Button rounded success onPress={() => onRegisterPress()}>
-                    <Text>Registor</Text>
-                </Button>
-            </View>
-            <View>
+    render() {
+        return (
+            <View style={styles.container}>
                 <View>
-                    <Image source={require('../assets/background/background.png')}>
+                    <Image source={require('../assets/background/home_header.png')}>
                     </Image>
                 </View>
+                <View>
+                    <Text>Tài Khoản : </Text>
+                    <TextInput
+                        style={{ height: 40, width: 300, borderColor: 'gray', borderWidth: 1, borderRadius: 10, margin: 10 }}
+                        onChangeText={(email) => this.setState({ email })}
+                        value={this.state.email}
+                    />
+                    <Text>Mật Khẩu : </Text>
+                    <TextInput
+                        style={{ height: 40, width: 300, borderColor: 'gray', borderWidth: 1, borderRadius: 10, margin: 10 }}
+                        onChangeText={(password) => this.setState({ password })}
+                        value={this.state.password}
+                    />
+                    <Text>Nhập Lại Mật Khẩu : </Text>
+                    <TextInput
+                        style={{ height: 40, width: 300, borderColor: 'gray', borderWidth: 1, borderRadius: 10, margin: 10 }}
+                        onChangeText={(confirmPassword) => this.setState({ confirmPassword })}
+                        value={this.state.confirmPassword}
+                    />
+                </View>
+                <View style={{ alignItems: 'center' }}>
+                    <Button rounded success onPress={() => this.onRegisterPress()}>
+                        <Text>Registor</Text>
+                    </Button>
+                </View>
+                <View>
+                    <View>
+                        <Image source={require('../assets/background/background.png')}>
+                        </Image>
+                    </View>
+                </View>
             </View>
-        </View>
-    )
+        )
+    }
 }
 
 const styles = StyleSheet.create({
@@ -104,3 +118,4 @@ const styles = StyleSheet.create({
         justifyContent: "center"
     },
 });
+export default ResScreen;

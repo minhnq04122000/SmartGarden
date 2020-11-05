@@ -17,8 +17,7 @@ if (!global.atob) { global.atob = decode }
 
 const Stack = createStackNavigator();
 
-
-export default function App() {
+class App extends Component {
   // const [loading, setLoading] = useState(true)
   // const [user, setUser] = useState(null)
   // if (loading) {
@@ -46,20 +45,28 @@ export default function App() {
   //     }
   //   });
   // }, []);
-  return (
-    <NavigationContainer>
-      <Stack.Navigator>
-        <Stack.Screen name="Login" component={Login} options={{
-          headerShown: false
-        }} />
-        <Stack.Screen name="Home" component={Home} options={{
-          headerShown: false, // change this to `false`
-        }} />
-        <Stack.Screen name="Res" component={Res} options={{
-          headerShown: false, // change this to `false`
-        }} />
-        <Stack.Screen name="Static" component={Static} />
-      </Stack.Navigator>
-    </NavigationContainer>
-  );
+  render() {
+    return (
+      <NavigationContainer>
+        <Stack.Navigator>
+          <Stack.Screen name="Login" component={Login} options={{
+            headerShown: false
+          }} />
+          <Stack.Screen name="Home" component={Home} options={{
+            headerShown: false, // change this to `false`
+          }} />
+          <Stack.Screen name="Static" component={Static} options={{
+            headerShown: false, // change this to `false`
+          }} />
+          <Stack.Screen name="Res" component={Res} options={{
+            headerShown: false, // change this to `false`
+          }} />
+
+        </Stack.Navigator>
+      </NavigationContainer>
+    );
+
+  }
 }
+export default App;
+

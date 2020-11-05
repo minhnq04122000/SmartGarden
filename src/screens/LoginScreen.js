@@ -17,23 +17,28 @@ import { firebaseApp } from '../components/FirebaseConfig';
 
 // const [value, onChangeText] = useState('Useless Placeholder');
 
-export default function LoginScreen({ navigation }) {
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-
-  const onFooterLinkPress = () => {
-    navigation.navigate('Res')
+class LoginScreen extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      email: '',
+      password: '',
+      uid: '',
+      usersRef: '',
+    }
+  }
+  onFooterLinkPress = () => {
+    this.props.navigation.navigate('Res')
   }
 
-  const onLoginPress = () => {
+  onLoginPress() {
     firebaseApp
       .auth()
-      .signInWithEmailAndPassword(email, password)
+      .signInWithEmailAndPassword(this.state.email, this.state.password)
       .then((response) => {
-        const uid = response.user.uid
-        const usersRef = firebaseApp.firestore().collection('users')
-        usersRef
-          .doc(uid)
+        this.state.uid = response.user.uid
+        this.state.usersRef = firebaseApp.firestore().collection('users')
+          .doc(this.state.uid)
           .get()
           .then(firestoreDocument => {
             if (!firestoreDocument.exists) {
@@ -51,43 +56,46 @@ export default function LoginScreen({ navigation }) {
         alert(error)
       })
   }
-  return (
-    <View style={styles.container}>
-      <View>
-        <Image source={require('../assets/background/home_header.png')}>
-        </Image>
-      </View>
-      <View>
-        <Text>Tài Khoản : </Text>
-        <TextInput
-          style={{ height: 40, width: 300, borderColor: 'gray', borderWidth: 1, borderRadius: 10, margin: 10 }}
-          onChangeText={(text) => setEmail(text)}
-          value={email}
-        />
-        <Text>Mật Khẩu : </Text>
-        <TextInput
-          style={{ height: 40, width: 300, borderColor: 'gray', borderWidth: 1, borderRadius: 10, margin: 10 }}
-          secureTextEntry
-          onChangeText={text => setPassword(text)}
-          value={password}
-        />
-      </View>
-      <View style={{ alignItems: 'center' }}>
-        <Button rounded success onPress={() => onLoginPress()}>
-          <Text>Login</Text>
-        </Button>
-        <Button rounded success onPress={() => onFooterLinkPress()}>
-          <Text>Registor</Text>
-        </Button>
-      </View>
-      <View>
+  render() {
+    return (
+      <View style={styles.container}>
         <View>
-          <Image source={require('../assets/background/background.png')}>
+          <Image source={require('../assets/background/home_header.png')}>
           </Image>
         </View>
+        <View>
+          <Text>Tài Khoản : </Text>
+          <TextInput
+            style={{ height: 40, width: 300, borderColor: 'gray', borderWidth: 1, borderRadius: 10, margin: 10 }}
+            onChangeText={(email) => this.setState({ email })}
+            value={this.state.email}
+          />
+          <Text>Mật Khẩu : </Text>
+          <TextInput
+            style={{ height: 40, width: 300, borderColor: 'gray', borderWidth: 1, borderRadius: 10, margin: 10 }}
+            secureTextEntry
+            onChangeText={(password) => this.setState({ password })}
+            value={this.state.password}
+          />
+        </View>
+        <View style={{ alignItems: 'center' }}>
+          <Button rounded success onPress={() => this.onLoginPress()}>
+            <Text>Login</Text>
+          </Button>
+          <Button rounded success onPress={() => this.onFooterLinkPress()}>
+            <Text>Registor</Text>
+          </Button>
+        </View>
+        <View>
+          <View>
+            <Image source={require('../assets/background/background.png')}>
+            </Image>
+          </View>
+        </View>
       </View>
-    </View>
-  )
+    )
+  }
+
 }
 
 const styles = StyleSheet.create({
@@ -103,3 +111,4 @@ const styles = StyleSheet.create({
     justifyContent: "center"
   },
 });
+export default LoginScreen
