@@ -30,7 +30,9 @@ class LoginScreen extends Component {
   onFooterLinkPress = () => {
     this.props.navigation.navigate('Res')
   }
-
+  onFooterLinkPress2 = () => {
+    this.props.navigation.navigate('Home')
+  }
   onLoginPress() {
     firebaseApp
       .auth()
@@ -79,12 +81,12 @@ class LoginScreen extends Component {
           />
         </View>
         <View style={{ alignItems: 'center' }}>
-          <Button rounded success onPress={() => this.onLoginPress()}>
-            <Text>Login</Text>
-          </Button>
-          <Button rounded success onPress={() => this.onFooterLinkPress()}>
-            <Text>Registor</Text>
-          </Button>
+            <Button style={{ width: 200, alignItems: 'center',justifyContent: 'center',marginBottom: 10,marginTop: 30  }} rounded success onPress={() => this.onFooterLinkPress2()}>
+              <Text>Login</Text>
+            </Button>
+            <Button style={{ width: 200,justifyContent: 'center' }} rounded success onPress={() => this.onFooterLinkPress()}>
+              <Text>Registor</Text>
+            </Button>
         </View>
         <View>
           <View>

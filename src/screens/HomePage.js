@@ -1,8 +1,10 @@
 import React, { useState, Component } from 'react';
-import { View, StyleSheet, Image, SafeAreaView } from 'react-native';
+import { View, StyleSheet, Image, SafeAreaView, Switch } from 'react-native';
 import { ListItem } from 'react-native-elements';
 import ToggleSwitch from 'toggle-switch-react-native';
 import { firebaseApp } from '../components/FirebaseConfig';
+
+import io from 'socket.io-client';
 
 import {
   Header,
@@ -21,101 +23,91 @@ import {
   Title,
   H1, H2, H3,
   Col, Row,
-
   Item
 } from 'native-base';
 
-
-// var firebase = require("firebase");
-
+var e;
 
 
 class HomePage extends Component {
   constructor(props) {
     super(props);
-    this.itemRef = firebaseApp.database()
+    e = this;
+
+    //socket
+    this.socket = io('http://192.168.1.27:3000/', {
+      transports: ['websocket'], jsonp: false
+    });
+    this.socket.connect();
     this.state = {
+      windowWidth: window.innerWidth,
+
+      switchValueMB: false,
+      switchValueMC: false,
+
       Do_Am: '',
       Nhiet_Do: '',
+      Do_Am_Dat: ''
     }
-    this.itemRef.ref('Do_Am/').on('value', function (snapshot) {
-      console.log(snapshot.val())
-    });
+    this.socket.on('sv-send-data', function (data) {
+      e.setState({
+        Nhiet_Do: data.nd,
+        Do_Am: data.da,
+        Do_Am_Dat: data.dad
+      })
+    })
+
+  }
+  _handleToggleSwitchMB = () => {
+    this.setState({
+      switchValueMB: !this.state.switchValueMB
+    })
+    this.socket.emit('client-send-MB', !this.state.switchValueMB)
+  }
+  _handleToggleSwitchMC = () => {
+    this.setState({
+      switchValueMC: !this.state.switchValueMC
+    })
+    this.socket.emit('client-send-MC', !this.state.switchValueMC)
   }
 
-  ListenItem(itemRef) {
-    var doam = '';
-    var nhietdo = '';
-    this.itemRef.ref('Do_Am/').on('value', function (snapshot) {
-      doam = snapshot.val();
-    });
-    this.itemRef.ref('Nhiet_Do/').on('value', function (snapshot) {
-      nhietdo = snapshot.val();
-    });
-    this.setState({
-      Do_Am: doam,
-      Nhiet_Do: nhietdo
-    })
+
+  GoToSetting = () => {
+    this.props.navigation.navigate('Setting')
   }
+
+
+  // ListenItem() {
+  //   return fetch('http://192.168.0.138:3000/data', {
+  //     method: 'GET'
+  //   })
+  //     .then((response) => response.json())
+  //     .then((responseJson) => {
+  //       this.setState({
+  //         Do_Am: responseJson.DoAm,
+  //         Nhiet_Do: responseJson.NhietDo,
+  //       });
+  //       console.log(this.state.Do_Am)
+  //     })
+
+  // }
 
   onFooterLinkPress = () => {
     this.props.navigation.navigate("Static")
   }
 
   render() {
+
     return (
       <Container style={styles.container}>
-        {/* <Header>
-          <Left>
-            <Button transparent>
-              <Icon name='arrow-back' />
-            </Button>
-          </Left>
-          <Body>
-            <Title>Header</Title>
-          </Body>
-          <Right>
-            <Button transparent>
-              <Icon name='menu' />
-            </Button>
-          </Right>
-        </Header> */}
-        {/* <Card style={{}}>
-          <Card.Title>Độ Ẩm</Card.Title>
-          <Text style={{ textAlign: "center" }}>{'50%'}</Text>
-          <ToggleSwitch
-            isOn={false}
-            onColor="#634fc9"
-            offColor="#ecf0f1"
-            label="Bật"
-            labelStyle={{ color: "black", fontWeight: "300" }}
-            size="normal"
-            onToggle={isOn => console.log("changed to : ", isOn)}
-          />
-          <Button transparent light onPress={() => { navigation.navigate("Static") }}>
-            <Image source={require('../assets/other/chart.png')} style={{ height: 20, width: 20 }} />
-          </Button>
-        </Card> */}
         <Card style={styles.card}>
           <CardItem header bordered>
             <Text>Độ Ẩm</Text>
           </CardItem>
           <CardItem bordered>
-            {/* <Text>{this.state.Do_Am + '%'}</Text> */}
+            <Text>{this.state.Do_Am + '%'}</Text>
           </CardItem>
           <CardItem footer bordered>
-            <ToggleSwitch
-              isOn={false}
-              onColor="#634fc9"
-              offColor="#ecf0f1"
-              label="Bật"
-              labelStyle={{ color: "black", fontWeight: "300" }}
-              size="normal"
-              onToggle={isOn => console.log("changed to : ", isOn)}
-            />
-            <Button transparent light onPress={() => this.onFooterLinkPress()}>
-              <Image source={require('../assets/other/chart.png')} style={{ height: 20, width: 20 }} />
-            </Button>
           </CardItem>
         </Card>
         <Card style={styles.card}>
@@ -123,68 +115,58 @@ class HomePage extends Component {
             <Text>Nhiệt Độ</Text>
           </CardItem>
           <CardItem bordered>
-            {/* <Text>{this.state.Nhiet_Do + '%'}</Text> */}
+            <Text>{this.state.Nhiet_Do + '°C'}</Text>
           </CardItem>
           <CardItem footer bordered>
-            <ToggleSwitch
-              isOn={false}
-              onColor="#634fc9"
-              offColor="#ecf0f1"
-              label="Bật"
-              labelStyle={{ color: "black", fontWeight: "300" }}
-              size="normal"
-              onToggle={isOn => console.log("changed to : ", isOn)}
-            />
-            <Button transparent light onPress={() => this.props.navigation.navigate("Static")}>
-              <Image source={require('../assets/other/chart.png')} style={{ height: 20, width: 20 }} />
-            </Button>
+            <Row style={{ justifyContent: 'space-between' }}>
+              <Row style={{ alignItems: 'center' }}>
+                <Text style={{ color: '#000000' }}>Mái Che</Text>
+                <Switch
+                  onValueChange={this._handleToggleSwitchMC}
+                  value={this.state.switchValueMC}
+                />
+              </Row>
+              <Button transparent light onPress={() => this.onFooterLinkPress()}>
+                <Image source={require('../assets/other/chart.png')} style={{ height: 20, width: 20 }} />
+              </Button>
+            </Row>
           </CardItem>
         </Card>
         <Card style={styles.card}>
           <CardItem header bordered>
-            <Text>Độ Ẩm</Text>
+            <Text>Độ Ẩm Đất</Text>
           </CardItem>
           <CardItem bordered>
-            <Text>50%</Text>
+            <Text>{this.state.Do_Am_Dat}%</Text>
           </CardItem>
           <CardItem footer bordered>
-            <ToggleSwitch
-              isOn={false}
-              onColor="#634fc9"
-              offColor="#ecf0f1"
-              label="Bật"
-              labelStyle={{ color: "black", fontWeight: "300" }}
-              size="normal"
-              onToggle={isOn => console.log("changed to : ", isOn)}
-            />
-            <Button transparent light onPress={() => this.onFooterLinkPress()}>
-              <Image source={require('../assets/other/chart.png')} style={{ height: 20, width: 20 }} />
-            </Button>
+            <Row style={{ justifyContent: 'space-between' }}>
+              <Row style={{ alignItems: 'center' }}>
+                <Text style={{ color: '#000000' }}>Máy Bơm</Text>
+                <Switch
+                  onValueChange={this._handleToggleSwitchMB}
+                  value={this.state.switchValueMB}
+                />
+              </Row>
+              <Button transparent light onPress={() => this.onFooterLinkPress()}>
+                <Image source={require('../assets/other/chart.png')} style={{ height: 20, width: 20 }} />
+              </Button>
+            </Row>
           </CardItem>
         </Card>
-        <Footer>
-          <FooterTab>
-            <Button vertical>
-              <Icon name="home" />
-              <Text>Home</Text>
-            </Button>
-            <Button vertical>
-              <Icon name="camera" />
-              <Text>Camera</Text>
-            </Button>
-          </FooterTab>
-        </Footer>
-        <Button rounded success onPress={() => this.ListenItem()}>
-          <Text>Resfresh</Text>
-        </Button>
+        <View style={{ margin: 20 }}>
+          <Button rounded success onPress={() => this.GoToSetting()}>
+            <Text>{'Đi Tới Cài Đặt'}</Text>
+          </Button>
+        </View>
       </Container>
     )
   }
+
   // componentDidMount() {
   //   this.ListenItem(this.itemRef);
   // }
 }
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -193,6 +175,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'white'
   },
   card: {
+    height: 200,
     width: 300,
     alignItems: 'center',
   }

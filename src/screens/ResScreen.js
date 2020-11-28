@@ -13,12 +13,22 @@ import {
     Item,
     Label
 } from 'native-base';
+import io from 'socket.io-client';
+
+var e;
 import { firebaseApp } from '../components/FirebaseConfig.js'
 
 
 class ResScreen extends Component {
     constructor(props) {
         super(props);
+        e = this;
+
+        //socket
+        this.socket = io('http://192.168.1.27:3000/', {
+            transports: ['websocket'], jsonp: false
+        });
+        this.socket.connect();
         this.state = {
             email: '',
             password: '',
@@ -26,42 +36,57 @@ class ResScreen extends Component {
         }
     }
     onRegisterPress() {
+        // console.log("ok")
         if (this.state.password !== this.state.confirmPassword) {
             alert("Passwords don't match.")
             return
         }
-        firebaseApp
-            .auth()
-            .createUserWithEmailAndPassword(this.state.email, this.state.password)
-            .then(() => {
-                Alert.alert(
-                    'Thông Báo',
-                    'Đăng Ký Thành Công Email : ' + this.state.email,
-                    [
-                        { text: 'Cancel', onPress: () => console.log('Cancel Pressed'), style: 'cancel' },
-                        { text: 'OK', onPress: () => this.props.navigation.navigate("Login") },
-                    ],
-                    { cancellabel: false }
-                )
-                this.setState({
-                    email: '',
-                    password: ''
-                })
-            })
-            .catch(function (error) {
-                Alert.alert(
-                    'Thông Báo',
-                    'Đăng Ký Thất Bại ! ',
-                    [
-                        { text: 'Cancel', onPress: () => console.log('Cancel Pressed'), style: 'cancel' },
-                        { text: 'OK', onPress: () => console.log('Cancel Pressed'), style: 'cancel' },
-                    ],
-                    { cancellabel: false }
-                )
-            });
+        var user = {
+            email : this.state.email,
+            password : this.state.password
+        }
 
-
+        this.socket.emit('client-send-user',user)
+        console.log(user)
     }
+    // onRegisterPress() {
+    //     if (this.state.password !== this.state.confirmPassword) {
+    //         alert("Passwords don't match.")
+    //         return
+    //     }
+
+    //     firebaseApp
+    //         .auth()
+    //         .createUserWithEmailAndPassword(this.state.email, this.state.password)
+    //         .then(() => {
+    //             Alert.alert(
+    //                 'Thông Báo',
+    //                 'Đăng Ký Thành Công Email : ' + this.state.email,
+    //                 [
+    //                     { text: 'Cancel', onPress: () => console.log('Cancel Pressed'), style: 'cancel' },
+    //                     { text: 'OK', onPress: () => this.props.navigation.navigate("Login") },
+    //                 ],
+    //                 { cancellabel: false }
+    //             )
+    //             this.setState({
+    //                 email: '',
+    //                 password: ''
+    //             })
+    //         })
+    //         .catch(function (error) {
+    //             Alert.alert(
+    //                 'Thông Báo',
+    //                 'Đăng Ký Thất Bại ! ',
+    //                 [
+    //                     { text: 'Cancel', onPress: () => console.log('Cancel Pressed'), style: 'cancel' },
+    //                     { text: 'OK', onPress: () => console.log('Cancel Pressed'), style: 'cancel' },
+    //                 ],
+    //                 { cancellabel: false }
+    //             )
+    //         });
+
+
+    // }
     render() {
         return (
             <View style={styles.container}>

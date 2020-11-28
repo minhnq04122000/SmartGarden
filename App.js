@@ -6,9 +6,11 @@ import Home from './src/screens/HomePage';
 import Login from './src/screens/LoginScreen';
 import Static from './src/screens/StaticScreen';
 import Res from './src/screens/ResScreen';
+import Setting from './src/screens/SettingScreen';
+
 import { decode, encode } from 'base-64';
 import { firebaseApp } from './src/components/FirebaseConfig'
-
+import io from 'socket.io-client';
 
 
 if (!global.btoa) { global.btoa = encode }
@@ -16,8 +18,14 @@ if (!global.atob) { global.atob = decode }
 
 
 const Stack = createStackNavigator();
-
 class App extends Component {
+  constructor(props) {
+    super(props);
+    this.socket = io('http://192.168.1.27:3000/', {
+      transports: ['websocket'], jsonp: false
+    });
+    this.socket.connect();
+  }
   // const [loading, setLoading] = useState(true)
   // const [user, setUser] = useState(null)
   // if (loading) {
@@ -59,6 +67,9 @@ class App extends Component {
             headerShown: false, // change this to `false`
           }} />
           <Stack.Screen name="Res" component={Res} options={{
+            headerShown: false, // change this to `false`
+          }} />
+          <Stack.Screen name="Setting" component={Setting} options={{
             headerShown: false, // change this to `false`
           }} />
 
