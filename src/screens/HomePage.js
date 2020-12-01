@@ -1,5 +1,5 @@
 import React, { useState, Component } from 'react';
-import { View, StyleSheet, Image, SafeAreaView, Switch } from 'react-native';
+import { View, StyleSheet, Image, SafeAreaView, Switch, ScrollView } from 'react-native';
 import { ListItem } from 'react-native-elements';
 import ToggleSwitch from 'toggle-switch-react-native';
 import { firebaseApp } from '../components/FirebaseConfig';
@@ -35,7 +35,7 @@ class HomePage extends Component {
     e = this;
 
     //socket
-    this.socket = io('http://192.168.1.27:3000/', {
+    this.socket = io('http://192.168.1.10:3000/', {
       transports: ['websocket'], jsonp: false
     });
     this.socket.connect();
@@ -97,68 +97,59 @@ class HomePage extends Component {
   }
 
   render() {
-
     return (
       <Container style={styles.container}>
-        <Card style={styles.card}>
-          <CardItem header bordered>
-            <Text>Độ Ẩm</Text>
-          </CardItem>
-          <CardItem bordered>
-            <Text>{this.state.Do_Am + '%'}</Text>
-          </CardItem>
-          <CardItem footer bordered>
-          </CardItem>
-        </Card>
-        <Card style={styles.card}>
-          <CardItem header bordered>
-            <Text>Nhiệt Độ</Text>
-          </CardItem>
-          <CardItem bordered>
-            <Text>{this.state.Nhiet_Do + '°C'}</Text>
-          </CardItem>
-          <CardItem footer bordered>
-            <Row style={{ justifyContent: 'space-between' }}>
-              <Row style={{ alignItems: 'center' }}>
-                <Text style={{ color: '#000000' }}>Mái Che</Text>
-                <Switch
-                  onValueChange={this._handleToggleSwitchMC}
-                  value={this.state.switchValueMC}
-                />
+          <Card style={styles.card}>
+            <CardItem header bordered>
+              <Text>Mực nước còn lại</Text>
+            </CardItem>
+            <CardItem bordered>
+              <Text>{this.state.Do_Am + '%'}</Text>
+            </CardItem>
+            <CardItem footer bordered>
+            </CardItem>
+          </Card>
+          <Card style={styles.card}>
+            <CardItem header bordered>
+              <Text>Nhiệt Độ</Text>
+            </CardItem>
+            <CardItem bordered>
+              <Text>{this.state.Nhiet_Do + '°C'}</Text>
+            </CardItem>
+            <CardItem footer bordered>
+              <Row style={{ justifyContent: 'space-between' }}>
+                <Row style={{ alignItems: 'center' }}>
+                  <Text style={{ color: '#000000' }}>Mái Che</Text>
+                </Row>
+                <Button transparent light onPress={() => this.onFooterLinkPress()}>
+                  <Image source={require('../assets/other/chart.png')} style={{ height: 20, width: 20 }} />
+                </Button>
               </Row>
-              <Button transparent light onPress={() => this.onFooterLinkPress()}>
-                <Image source={require('../assets/other/chart.png')} style={{ height: 20, width: 20 }} />
-              </Button>
-            </Row>
-          </CardItem>
-        </Card>
-        <Card style={styles.card}>
-          <CardItem header bordered>
-            <Text>Độ Ẩm Đất</Text>
-          </CardItem>
-          <CardItem bordered>
-            <Text>{this.state.Do_Am_Dat}%</Text>
-          </CardItem>
-          <CardItem footer bordered>
-            <Row style={{ justifyContent: 'space-between' }}>
-              <Row style={{ alignItems: 'center' }}>
-                <Text style={{ color: '#000000' }}>Máy Bơm</Text>
-                <Switch
-                  onValueChange={this._handleToggleSwitchMB}
-                  value={this.state.switchValueMB}
-                />
+            </CardItem>
+          </Card>
+          <Card style={styles.card}>
+            <CardItem header bordered>
+              <Text>Độ Ẩm Đất</Text>
+            </CardItem>
+            <CardItem bordered>
+              <Text>{this.state.Do_Am_Dat}%</Text>
+            </CardItem>
+            <CardItem footer bordered>
+              <Row style={{ justifyContent: 'space-between' }}>
+                <Row style={{ alignItems: 'center' }}>
+                  <Text style={{ color: '#000000' }}>Máy Bơm</Text>
+                </Row>
+                <Button transparent light onPress={() => this.onFooterLinkPress()}>
+                  <Image source={require('../assets/other/chart.png')} style={{ height: 20, width: 20 }} />
+                </Button>
               </Row>
-              <Button transparent light onPress={() => this.onFooterLinkPress()}>
-                <Image source={require('../assets/other/chart.png')} style={{ height: 20, width: 20 }} />
-              </Button>
-            </Row>
-          </CardItem>
-        </Card>
-        <View style={{ margin: 20 }}>
-          <Button rounded success onPress={() => this.GoToSetting()}>
-            <Text>{'Đi Tới Cài Đặt'}</Text>
-          </Button>
-        </View>
+            </CardItem>
+          </Card>
+          <View style={{ margin: 20 }}>
+            <Button rounded success onPress={() => this.GoToSetting()}>
+              <Text>{'Đi Tới Cài Đặt'}</Text>
+            </Button>
+          </View>
       </Container>
     )
   }
