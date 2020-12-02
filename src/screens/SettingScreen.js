@@ -23,31 +23,32 @@ import {
 
 import io from 'socket.io-client';
 var e;
-
+var obj;
 export default class SettingScreen extends Component {
 
     constructor(props) {
 
         super(props);
         e = this;
-        this.socket = io('http://192.168.1.27:3000/', {
+        this.socket = io('http://192.168.0.101:3000/', {
             transports: ['websocket'], jsonp: false
         });
         this.socket.connect();
         this.state = {
-            datadevice: [],
-            switchValueMB: false,
-            switchValueLED: false,
-            switchValueSTT: false,
+            datadevice: {},
+            switchValueMB: Boolean,
+            switchValueLED: Boolean,
+            switchValueSTT: Boolean,
             stt: 'AuTo',
             sttled: '',
             sttmb: '',
             ndtuoiAT: '',
-            datuoiAT: '',
+            datuoiATmin: '',
+            datuoiATmax: '',
             ndtuoiMN: '',
-            datuoiMN: '',
             congsuatMN: '',
             mucnuoc: '',
+            chieucaobe: ''
 
         }
         this.socket.on('sv-send-stt', function (data) {
@@ -71,30 +72,44 @@ export default class SettingScreen extends Component {
             })
         })
 
+
     }
 
-    // componentDidMount() {
-    //     fetch('http://192.168.0.109:3000/device')
-    //         .then(response => response.json())
-    //         .then(data => console.log(data.datuoiAT))
+
+
+    // _updateNDAT = (ndtuoiAT) => {
+    //     this.setState({ ndtuoiAT: ndtuoiAT })
+    //     this.socket.emit('client-send-ndtuoiAT', ndtuoiAT)
     // }
-
-    _updateNDAT = (ndtuoiAT) => {
-        this.setState({ ndtuoiAT: ndtuoiAT })
-        this.socket.emit('client-send-ndtuoiAT', ndtuoiAT)
-    }
     _updateNDMN = (ndtuoiMN) => {
         this.setState({ ndtuoiMN: ndtuoiMN })
         this.socket.emit('client-send-ndtuoiMN', ndtuoiMN)
     }
 
-    _updateDAAT = (datuoiAT) => {
-        this.setState({ datuoiAT: datuoiAT })
-        this.socket.emit('client-send-datuoiAT', datuoiAT)
-    }
+    // _updateDAAT = (datuoiAT) => {
+    //     this.setState({ datuoiAT: datuoiAT })
+    //     this.socket.emit('client-send-datuoiAT', datuoiAT)
+    // }
     _updateDAMN = (datuoiMN) => {
         this.setState({ datuoiMN: datuoiMN })
         this.socket.emit('client-send-datuoiMN', datuoiMN)
+    }
+    SENDCHIEUCAOBE() {
+        this.socket.emit('client-send-chieucaobe', this.state.chieucaobe)
+
+    }
+    SENDNHIETDOAUTO() {
+        this.socket.emit('client-send-ndtuoiAT', this.state.ndtuoiAT)
+
+    }
+    SENDDOAMAUTO() {
+        var doamAT = {
+            datuoiATmin: this.state.datuoiATmin,
+            datuoiATmax: this.state.datuoiATmax
+        }
+        if (this.state.datuoiATmin.length > 0 || this.state.datuoiATmax.length > 0) {
+            this.socket.emit('client-send-datuoiAT', doamAT)
+        }
     }
     SENDMUCNUOC() {
         this.socket.emit('client-send-mucnuoc', this.state.mucnuoc)
@@ -117,7 +132,24 @@ export default class SettingScreen extends Component {
         })
         this.socket.emit('client-send-stt', !this.state.switchValueSTT)
     }
+    componentDidMount() {
+        fetch('http://192.168.0.101:3000/', {
+            method: 'GET'
+        })
+            .then(response => response.json())
+            .then((responseJson) => {
+                this.setState({
+                    datadevice: responseJson,
+                    switchValueMB:responseJson.switchValueMB,
+                    switchValueLED:responseJson.switchValueLED,
+                    switchValueSTT:responseJson.switchValueSTT
+                });
+            })
+    }
+
+
     render() {
+        console.log(this.state.datadevice.nhietdo)
         return (
             <View >
                 <ScrollView>
@@ -129,7 +161,6 @@ export default class SettingScreen extends Component {
                             <Text style={{ color: '#000000' }}>{'Trạng thái hoạt động : '}</Text>
                             <Text style={{ color: '#000000', fontWeight: 'bold' }}>{this.state.stt}</Text>
                             <Switch
-
                                 onValueChange={this._handleToggleSwitchSTT}
                                 value={this.state.switchValueSTT}
                             />
@@ -140,28 +171,67 @@ export default class SettingScreen extends Component {
                     </View>
                     <View style={{ marginLeft: 40, marginRight: 40, flex: 1 }}>
                         <Text style={{ color: '#000000' }}>{'Nhiệt Độ tưới cây : '}</Text>
-                        <Picker selectedValue={this.state.ndtuoiAT} onValueChange={this._updateNDAT}>
-                            <Picker.Item label="20 %" value="20" />
-                            <Picker.Item label="40 %" value="40" />
-                            <Picker.Item label="60 %" value="60" />
-                            <Picker.Item label="80 %" value="80" />
-                            <Picker.Item label="100 %" value="100" />
-                        </Picker>
+                        <Row style={{ justifyContent: 'space-between' }}>
+                            <TextInput
+                                placeholder={this.state.datadevice.nhietdotuoi}
+                                keyboardType='numeric'
+                                style={{ height: 40, width: 200, borderColor: 'gray', borderWidth: 1, borderRadius: 10, margin: 10 }}
+                                onChangeText={(ndtuoiAT) => this.setState({ ndtuoiAT })}
+                                value={this.state.ndtuoiAT}
+                            />
+                            <Button style={{ width: 80, justifyContent: 'center', margin: 10 }} rounded success onPress={() => this.SENDNHIETDOAUTO()}>
+                                <Text>Gửi</Text>
+                            </Button>
+                        </Row>
                     </View>
                     <View style={{ marginLeft: 40, marginRight: 40 }}>
                         <Text style={{ color: '#000000' }}>{'Độ Ẩm tưới cây : '}</Text>
-                        <Picker selectedValue={this.state.datuoiAT} onValueChange={this._updateDAAT}>
-                            <Picker.Item label="20 %" value="20" />
-                            <Picker.Item label="40 %" value="40" />
-                            <Picker.Item label="60 %" value="60" />
-                            <Picker.Item label="80 %" value="80" />
-                            <Picker.Item label="100 %" value="100" />
-                        </Picker>
+                        <Row style={{ justifyContent: 'space-between', alignItems: 'center' }}>
+                            <Text style={{ fontWeight: 'bold' }}>Từ</Text>
+                            <TextInput
+                                placeholder={this.state.datadevice.doammin}
+                                keyboardType='numeric'
+                                style={{ height: 40, width: 67, borderColor: 'gray', borderWidth: 1, borderRadius: 10, margin: 10 }}
+                                onChangeText={(datuoiATmin) => this.setState({ datuoiATmin })}
+                                value={this.state.datuoiATmin}
+                            />
+                            <Text style={{ fontWeight: 'bold' }}>Đến</Text>
+                            <TextInput
+                                placeholder={this.state.datadevice.doammax}
+                                keyboardType='numeric'
+                                style={{ height: 40, width: 67, borderColor: 'gray', borderWidth: 1, borderRadius: 10, margin: 10 }}
+                                onChangeText={(datuoiATmax) => this.setState({ datuoiATmax })}
+                                value={this.state.datuoiATmax}
+                            />
+                            <Button style={{ width: 80, justifyContent: 'center', margin: 10, alignItems: 'flex-end' }} rounded success onPress={() => this.SENDDOAMAUTO()}>
+                                <Text>Gửi</Text>
+                            </Button>
+                        </Row>
+                        <Row style={{ justifyContent: 'center' }}>
+
+                        </Row>
                     </View>
                     <View style={{ marginLeft: 40, marginRight: 40 }}>
-                        <Text style={{ color: '#000000' }}>{'Nhập Mực nước còn lại : '}</Text>
+                        <Text style={{ color: '#000000' }}>{'Nhập Chiều Cao Của Bể : '}</Text>
                         <Row>
                             <TextInput
+                                placeholder={this.state.datadevice.docaobe}
+                                keyboardType='numeric'
+                                style={{ height: 40, width: 200, borderColor: 'gray', borderWidth: 1, borderRadius: 10, margin: 10 }}
+                                onChangeText={(chieucaobe) => this.setState({ chieucaobe })}
+                                value={this.state.chieucaobe}
+                            />
+                            <Button style={{ width: 80, justifyContent: 'center', margin: 10 }} rounded success onPress={() => this.SENDCHIEUCAOBE()}>
+                                <Text>Gửi</Text>
+                            </Button>
+                        </Row>
+
+                    </View>
+                    <View style={{ marginLeft: 40, marginRight: 40 }}>
+                        <Text style={{ color: '#000000' }}>{'Nhập Mực Tối Thiểu : '}</Text>
+                        <Row>
+                            <TextInput
+                            placeholder={this.state.datadevice.mucnuoc}
                                 keyboardType='numeric'
                                 style={{ height: 40, width: 200, borderColor: 'gray', borderWidth: 1, borderRadius: 10, margin: 10 }}
                                 onChangeText={(mucnuoc) => this.setState({ mucnuoc })}
@@ -173,10 +243,10 @@ export default class SettingScreen extends Component {
                         </Row>
 
                     </View>
-                    <View style={{ marginLeft: 40 }}>
+                    <View style={{ margin: 40 }}>
                         <H3 style={{ fontWeight: 'bold' }}>{'Chế Độ Manual :'}</H3>
                     </View>
-                    <View style={{ margin: 40 }}>
+                    <View style={{ marginLeft: 40,marginRight:40,marginBottom:40}}>
                         <Row style={{ alignItems: 'center', justifyContent: 'space-around' }}>
                             <Row>
                                 <Text style={{ color: '#000000' }}>Máy Bơm : </Text>
@@ -188,7 +258,7 @@ export default class SettingScreen extends Component {
                             />
                         </Row>
                     </View>
-                    <View style={{ margin: 40 }}>
+                    <View style={{ marginLeft: 40,marginRight:40,marginBottom:40 }}>
                         <Row style={{ alignItems: 'center', justifyContent: 'space-around' }}>
                             <Row>
                                 <Text style={{ color: '#000000' }}>Đèn Led : </Text>
@@ -199,26 +269,6 @@ export default class SettingScreen extends Component {
                                 value={this.state.switchValueLED}
                             />
                         </Row>
-                    </View>
-                    <View style={{ marginLeft: 40, marginRight: 40 }}>
-                        <Text style={{ color: '#000000' }}>{'Độ Ẩm : '}</Text>
-                        <Picker selectedValue={this.state.datuoiMN} onValueChange={this._updateDAMN}>
-                            <Picker.Item label="20 %" value="20" />
-                            <Picker.Item label="40 %" value="40" />
-                            <Picker.Item label="60 %" value="60" />
-                            <Picker.Item label="80 %" value="80" />
-                            <Picker.Item label="100 %" value="100" />
-                        </Picker>
-                    </View>
-                    <View style={{ marginLeft: 40, marginRight: 40 }}>
-                        <Text style={{ color: '#000000' }}>{'Nhiệt Độ : '}</Text>
-                        <Picker selectedValue={this.state.ndtuoiMN} onValueChange={this._updateNDMN}>
-                            <Picker.Item label="20 %" value="20" />
-                            <Picker.Item label="40 %" value="40" />
-                            <Picker.Item label="60 %" value="60" />
-                            <Picker.Item label="80 %" value="80" />
-                            <Picker.Item label="100 %" value="100" />
-                        </Picker>
                     </View>
                 </ScrollView>
             </View>

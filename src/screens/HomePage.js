@@ -1,5 +1,5 @@
 import React, { useState, Component } from 'react';
-import { View, StyleSheet, Image, SafeAreaView, Switch } from 'react-native';
+import { View, StyleSheet, Image, SafeAreaView, Switch, ScrollView } from 'react-native';
 import { ListItem } from 'react-native-elements';
 import ToggleSwitch from 'toggle-switch-react-native';
 import { firebaseApp } from '../components/FirebaseConfig';
@@ -35,7 +35,7 @@ class HomePage extends Component {
     e = this;
 
     //socket
-    this.socket = io('http://192.168.1.27:3000/', {
+    this.socket = io('http://192.168.0.101:3000/', {
       transports: ['websocket'], jsonp: false
     });
     this.socket.connect();
@@ -95,14 +95,14 @@ class HomePage extends Component {
   onFooterLinkPress = () => {
     this.props.navigation.navigate("Static")
   }
+  
 
   render() {
-
     return (
       <Container style={styles.container}>
         <Card style={styles.card}>
           <CardItem header bordered>
-            <Text>Độ Ẩm</Text>
+            <Text>Mực nước còn lại</Text>
           </CardItem>
           <CardItem bordered>
             <Text>{this.state.Do_Am + '%'}</Text>
@@ -121,10 +121,6 @@ class HomePage extends Component {
             <Row style={{ justifyContent: 'space-between' }}>
               <Row style={{ alignItems: 'center' }}>
                 <Text style={{ color: '#000000' }}>Mái Che</Text>
-                <Switch
-                  onValueChange={this._handleToggleSwitchMC}
-                  value={this.state.switchValueMC}
-                />
               </Row>
               <Button transparent light onPress={() => this.onFooterLinkPress()}>
                 <Image source={require('../assets/other/chart.png')} style={{ height: 20, width: 20 }} />
@@ -143,10 +139,6 @@ class HomePage extends Component {
             <Row style={{ justifyContent: 'space-between' }}>
               <Row style={{ alignItems: 'center' }}>
                 <Text style={{ color: '#000000' }}>Máy Bơm</Text>
-                <Switch
-                  onValueChange={this._handleToggleSwitchMB}
-                  value={this.state.switchValueMB}
-                />
               </Row>
               <Button transparent light onPress={() => this.onFooterLinkPress()}>
                 <Image source={require('../assets/other/chart.png')} style={{ height: 20, width: 20 }} />
