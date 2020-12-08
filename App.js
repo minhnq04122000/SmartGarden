@@ -21,7 +21,7 @@ const Stack = createStackNavigator();
 class App extends Component {
   constructor(props) {
     super(props);
-    this.socket = io('http://192.168.0.101:3000/', {
+    this.socket = io('http://192.168.1.10:3000/', {
       transports: ['websocket'], jsonp: false
     });
     this.socket.connect();

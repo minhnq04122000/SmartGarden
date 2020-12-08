@@ -21,7 +21,8 @@ class LoginScreen extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      email: '',
+      ArrUser: [],
+      username: '',
       password: '',
       uid: '',
       usersRef: '',
@@ -34,28 +35,38 @@ class LoginScreen extends Component {
     this.props.navigation.navigate('Home')
   }
   onLoginPress() {
-    firebaseApp
-      .auth()
-      .signInWithEmailAndPassword(this.state.email, this.state.password)
-      .then((response) => {
-        this.state.uid = response.user.uid
-        this.state.usersRef = firebaseApp.firestore().collection('users')
-          .doc(this.state.uid)
-          .get()
-          .then(firestoreDocument => {
-            if (!firestoreDocument.exists) {
-              alert("User does not exist anymore.")
-              return;
-            }
-            const user = firestoreDocument.data()
-            navigation.navigate('Home', { user })
-          })
-          .catch(error => {
-            alert(error)
-          });
-      })
-      .catch(error => {
-        alert(error)
+    if (this.state.username == '') {
+      alert('Nhập Tài Khoản')
+    } else if (this.state.password == '') {
+      alert('Nhập Mật Khẩu')
+    } else {
+      let status = 0;
+      let statuspass = 0;
+      for (let index = 0; index < this.state.ArrUser.length; index++) {
+        const element = this.state.ArrUser[index];
+        if (this.state.username == element.username && this.state.password == element.password) {
+          status++;
+        } if (this.state.username == element.username && this.state.password != element.password) {
+          statuspass++;
+        }
+      }
+      if (status > 0) {
+        this.props.navigation.navigate('Home', { userLogin: this.state.username })
+      } else {
+        alert('Không Tìm Thấy Tài Khoản')
+      }
+      if(statuspass>0){
+        alert('Mật Khẩu Không Đúng, Vui Lòng Thử Lại')
+      }
+    }
+  }
+  componentDidMount() {
+    fetch('http://192.168.0.104:3000/Alluser')
+      .then(response => response.json())
+      .then(data => {
+        this.setState({
+          ArrUser: data
+        })
       })
   }
   render() {
@@ -69,8 +80,8 @@ class LoginScreen extends Component {
           <Text>Tài Khoản : </Text>
           <TextInput
             style={{ height: 40, width: 300, borderColor: 'gray', borderWidth: 1, borderRadius: 10, margin: 10 }}
-            onChangeText={(email) => this.setState({ email })}
-            value={this.state.email}
+            onChangeText={(username) => this.setState({ username })}
+            value={this.state.username}
           />
           <Text>Mật Khẩu : </Text>
           <TextInput
@@ -81,12 +92,12 @@ class LoginScreen extends Component {
           />
         </View>
         <View style={{ alignItems: 'center' }}>
-            <Button style={{ width: 200, alignItems: 'center',justifyContent: 'center',marginBottom: 10,marginTop: 30  }} rounded success onPress={() => this.onFooterLinkPress2()}>
-              <Text>Login</Text>
-            </Button>
-            <Button style={{ width: 200,justifyContent: 'center' }} rounded success onPress={() => this.onFooterLinkPress()}>
-              <Text>Registor</Text>
-            </Button>
+          <Button style={{ width: 200, alignItems: 'center', justifyContent: 'center', marginBottom: 10, marginTop: 30 }} rounded success onPress={() => this.onLoginPress()}>
+            <Text>Login</Text>
+          </Button>
+          <Button style={{ width: 200, justifyContent: 'center' }} rounded success onPress={() => this.onFooterLinkPress()}>
+            <Text>Registor</Text>
+          </Button>
         </View>
         <View>
           <View>

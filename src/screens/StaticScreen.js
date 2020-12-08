@@ -13,7 +13,7 @@ export default class StaticScreen extends Component {
         }
         //socket
 
-        this.socket = io('http://192.168.1.27:3000/', {
+        this.socket = io('http://192.168.1.10:3000/', {
             transports: ['websocket'], jsonp: false
         });
         this.socket.connect();

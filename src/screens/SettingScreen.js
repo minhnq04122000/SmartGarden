@@ -20,17 +20,17 @@ import {
     Col, Row,
     Item
 } from 'native-base';
+import DatePicker from 'react-native-date-picker'
 
 import io from 'socket.io-client';
 var e;
-var obj;
+var stt;
 export default class SettingScreen extends Component {
 
     constructor(props) {
-
         super(props);
         e = this;
-        this.socket = io('http://192.168.0.101:3000/', {
+        this.socket = io('http://192.168.1.10:3000/', {
             transports: ['websocket'], jsonp: false
         });
         this.socket.connect();
@@ -39,7 +39,6 @@ export default class SettingScreen extends Component {
             switchValueMB: Boolean,
             switchValueLED: Boolean,
             switchValueSTT: Boolean,
-            stt: 'AuTo',
             sttled: '',
             sttmb: '',
             ndtuoiAT: '',
@@ -48,14 +47,10 @@ export default class SettingScreen extends Component {
             ndtuoiMN: '',
             congsuatMN: '',
             mucnuoc: '',
-            chieucaobe: ''
+            chieucaobe: '',
+            isVisible: false
 
         }
-        this.socket.on('sv-send-stt', function (data) {
-            e.setState({
-                stt: data
-            })
-        })
         this.socket.on('sv-send-sttled', function (data) {
             e.setState({
                 sttled: data
@@ -96,10 +91,28 @@ export default class SettingScreen extends Component {
     }
     SENDCHIEUCAOBE() {
         this.socket.emit('client-send-chieucaobe', this.state.chieucaobe)
+        fetch('http://192.168.1.10:3000/', {
+            method: 'GET'
+        })
+            .then(response => response.json())
+            .then((responseJson) => {
+                this.setState({
+                    datadevice: responseJson
+                });
+            })
 
     }
     SENDNHIETDOAUTO() {
         this.socket.emit('client-send-ndtuoiAT', this.state.ndtuoiAT)
+        fetch('http://192.168.1.10:3000/', {
+            method: 'GET'
+        })
+            .then(response => response.json())
+            .then((responseJson) => {
+                this.setState({
+                    datadevice: responseJson
+                });
+            })
 
     }
     SENDDOAMAUTO() {
@@ -110,46 +123,106 @@ export default class SettingScreen extends Component {
         if (this.state.datuoiATmin.length > 0 || this.state.datuoiATmax.length > 0) {
             this.socket.emit('client-send-datuoiAT', doamAT)
         }
+        fetch('http://192.168.1.10:3000/', {
+            method: 'GET'
+        })
+            .then(response => response.json())
+            .then((responseJson) => {
+                this.setState({
+                    datadevice: responseJson
+                });
+            })
     }
     SENDMUCNUOC() {
         this.socket.emit('client-send-mucnuoc', this.state.mucnuoc)
+        fetch('http://192.168.1.10:3000/', {
+            method: 'GET'
+        })
+            .then(response => response.json())
+            .then((responseJson) => {
+                this.setState({
+                    datadevice: responseJson
+                });
+            })
     }
     _handleToggleSwitchMB = () => {
         this.setState({
             switchValueMB: !this.state.switchValueMB
         })
         this.socket.emit('client-send-MB', !this.state.switchValueMB)
+        fetch('http://192.168.1.10:3000/', {
+            method: 'GET'
+        })
+            .then(response => response.json())
+            .then((responseJson) => {
+                this.setState({
+                    datadevice: responseJson
+                });
+            })
     }
     _handleToggleSwitchLED = () => {
         this.setState({
             switchValueLED: !this.state.switchValueLED
         })
         this.socket.emit('client-send-STTLED', !this.state.switchValueLED)
+        fetch('http://192.168.1.10:3000/', {
+            method: 'GET'
+        })
+            .then(response => response.json())
+            .then((responseJson) => {
+                this.setState({
+                    datadevice: responseJson
+                });
+            })
     }
+
     _handleToggleSwitchSTT = () => {
         this.setState({
             switchValueSTT: !this.state.switchValueSTT,
         })
         this.socket.emit('client-send-stt', !this.state.switchValueSTT)
+        fetch('http://192.168.1.10:3000/', {
+            method: 'GET'
+        })
+            .then(response => response.json())
+            .then((responseJson) => {
+                this.setState({
+                    datadevice: responseJson
+                });
+            })
     }
+    handlePicker = () => {
+        this.setState({
+            isVisible
+        })
+    }
+
     componentDidMount() {
-        fetch('http://192.168.0.101:3000/', {
+        fetch('http://192.168.1.10:3000/', {
             method: 'GET'
         })
             .then(response => response.json())
             .then((responseJson) => {
                 this.setState({
                     datadevice: responseJson,
-                    switchValueMB:responseJson.switchValueMB,
-                    switchValueLED:responseJson.switchValueLED,
-                    switchValueSTT:responseJson.switchValueSTT
+                    switchValueMB: responseJson.switchValueMB,
+                    switchValueLED: responseJson.switchValueLED,
+                    switchValueSTT: responseJson.switchValueSTT
                 });
             })
     }
+    checkstt() {
+        if (this.state.switchValueSTT == true) {
+            stt = "Manual"
+        }
+        if (this.state.switchValueSTT == false) {
+            stt = "Auto"
+        }
 
+    }
 
     render() {
-        console.log(this.state.datadevice.nhietdo)
+        this.checkstt()
         return (
             <View >
                 <ScrollView>
@@ -159,7 +232,7 @@ export default class SettingScreen extends Component {
                     <View style={{ marginLeft: 40, marginBottom: 40, marginRight: 40 }}>
                         <Row style={{ alignItems: 'center', justifyContent: 'space-between' }}>
                             <Text style={{ color: '#000000' }}>{'Trạng thái hoạt động : '}</Text>
-                            <Text style={{ color: '#000000', fontWeight: 'bold' }}>{this.state.stt}</Text>
+                            <Text style={{ color: '#000000', fontWeight: 'bold' }}>{stt}</Text>
                             <Switch
                                 onValueChange={this._handleToggleSwitchSTT}
                                 value={this.state.switchValueSTT}
@@ -231,7 +304,7 @@ export default class SettingScreen extends Component {
                         <Text style={{ color: '#000000' }}>{'Nhập Mực Tối Thiểu : '}</Text>
                         <Row>
                             <TextInput
-                            placeholder={this.state.datadevice.mucnuoc}
+                                placeholder={this.state.datadevice.mucnuoc}
                                 keyboardType='numeric'
                                 style={{ height: 40, width: 200, borderColor: 'gray', borderWidth: 1, borderRadius: 10, margin: 10 }}
                                 onChangeText={(mucnuoc) => this.setState({ mucnuoc })}
@@ -246,7 +319,7 @@ export default class SettingScreen extends Component {
                     <View style={{ margin: 40 }}>
                         <H3 style={{ fontWeight: 'bold' }}>{'Chế Độ Manual :'}</H3>
                     </View>
-                    <View style={{ marginLeft: 40,marginRight:40,marginBottom:40}}>
+                    <View style={{ marginLeft: 40, marginRight: 40, marginBottom: 40 }}>
                         <Row style={{ alignItems: 'center', justifyContent: 'space-around' }}>
                             <Row>
                                 <Text style={{ color: '#000000' }}>Máy Bơm : </Text>
@@ -258,7 +331,7 @@ export default class SettingScreen extends Component {
                             />
                         </Row>
                     </View>
-                    <View style={{ marginLeft: 40,marginRight:40,marginBottom:40 }}>
+                    <View style={{ marginLeft: 40, marginRight: 40, marginBottom: 80 }}>
                         <Row style={{ alignItems: 'center', justifyContent: 'space-around' }}>
                             <Row>
                                 <Text style={{ color: '#000000' }}>Đèn Led : </Text>
@@ -270,6 +343,7 @@ export default class SettingScreen extends Component {
                             />
                         </Row>
                     </View>
+
                 </ScrollView>
             </View>
 

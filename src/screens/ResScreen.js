@@ -25,69 +25,65 @@ class ResScreen extends Component {
         e = this;
 
         //socket
-        this.socket = io('http://192.168.1.27:3000/', {
+        this.socket = io('http://192.168.0.104:3000/', {
             transports: ['websocket'], jsonp: false
         });
         this.socket.connect();
         this.state = {
-            email: '',
+            ArrUser: [],
+            username: '',
             password: '',
             confirmPassword: ''
         }
+
     }
     onRegisterPress() {
-        // console.log("ok")
-        if (this.state.password !== this.state.confirmPassword) {
-            alert("Passwords don't match.")
-            return
-        }
+
         var user = {
-            email : this.state.email,
-            password : this.state.password
+            username: this.state.username,
+            password: this.state.password,
+            repass: this.state.confirmPassword
         }
 
-        this.socket.emit('client-send-user',user)
-        console.log(user)
+        if (user.username == '') {
+            alert('Vui Lòng Điền Tài Khoản')
+        } else if (user.password == '') {
+            alert('Vui Lòng Điền Mật Khẩu')
+        } else if (user.password != user.repass) {
+            alert('Password Không Trùng Nhau')
+        } else if (user.password.length < 8 || user.repass.length < 8) {
+            alert('Password phải lớn hơn 8 ký tự')
+        }
+        else {
+            let stt = 0;
+            for (let index = 0; index < this.state.ArrUser.length; index++) {
+                const element = this.state.ArrUser[index];
+                if (user.username == element.username) {
+                    stt++;
+                }
+            }
+            if (stt > 0) {
+                alert('Tên Đăng Nhập' + user.username + 'Đã Tồn Tại, Vui Lòng Nhập Tên Khác')
+            } else if (stt <= 0) {
+                alert('Đăng ký thành công tài khoản : ' + user.username)
+                this.props.navigation.navigate('Login')
+                this.socket.emit('client-send-user', user)
+            }
+        }
+
     }
-    // onRegisterPress() {
-    //     if (this.state.password !== this.state.confirmPassword) {
-    //         alert("Passwords don't match.")
-    //         return
-    //     }
+    componentDidMount() {
+        fetch('http://192.168.0.104:3000/Alluser')
+            .then(response => response.json())
+            .then(data => {
+                this.setState({
+                    ArrUser: data
+                })
+            })
+    }
 
-    //     firebaseApp
-    //         .auth()
-    //         .createUserWithEmailAndPassword(this.state.email, this.state.password)
-    //         .then(() => {
-    //             Alert.alert(
-    //                 'Thông Báo',
-    //                 'Đăng Ký Thành Công Email : ' + this.state.email,
-    //                 [
-    //                     { text: 'Cancel', onPress: () => console.log('Cancel Pressed'), style: 'cancel' },
-    //                     { text: 'OK', onPress: () => this.props.navigation.navigate("Login") },
-    //                 ],
-    //                 { cancellabel: false }
-    //             )
-    //             this.setState({
-    //                 email: '',
-    //                 password: ''
-    //             })
-    //         })
-    //         .catch(function (error) {
-    //             Alert.alert(
-    //                 'Thông Báo',
-    //                 'Đăng Ký Thất Bại ! ',
-    //                 [
-    //                     { text: 'Cancel', onPress: () => console.log('Cancel Pressed'), style: 'cancel' },
-    //                     { text: 'OK', onPress: () => console.log('Cancel Pressed'), style: 'cancel' },
-    //                 ],
-    //                 { cancellabel: false }
-    //             )
-    //         });
-
-
-    // }
     render() {
+        console.log(this.state.ArrUser)
         return (
             <View style={styles.container}>
                 <View>
@@ -98,8 +94,8 @@ class ResScreen extends Component {
                     <Text>Tài Khoản : </Text>
                     <TextInput
                         style={{ height: 40, width: 300, borderColor: 'gray', borderWidth: 1, borderRadius: 10, margin: 10 }}
-                        onChangeText={(email) => this.setState({ email })}
-                        value={this.state.email}
+                        onChangeText={(username) => this.setState({ username })}
+                        value={this.state.username}
                     />
                     <Text>Mật Khẩu : </Text>
                     <TextInput

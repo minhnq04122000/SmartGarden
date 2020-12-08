@@ -27,7 +27,8 @@ import {
 } from 'native-base';
 
 var e;
-
+var sttden;
+var sttmaybom;
 
 class HomePage extends Component {
   constructor(props) {
@@ -35,25 +36,40 @@ class HomePage extends Component {
     e = this;
 
     //socket
-    this.socket = io('http://192.168.0.101:3000/', {
+    this.socket = io('http://192.168.1.10:3000/', {
       transports: ['websocket'], jsonp: false
     });
     this.socket.connect();
     this.state = {
       windowWidth: window.innerWidth,
+      userLogin: props.route.params.userLogin,
+      switchValueMB: Boolean,
+      switchValueLED: Boolean,
 
-      switchValueMB: false,
-      switchValueMC: false,
-
-      Do_Am: '',
+      phantram_conlai: '',
       Nhiet_Do: '',
       Do_Am_Dat: ''
     }
     this.socket.on('sv-send-data', function (data) {
       e.setState({
         Nhiet_Do: data.nd,
-        Do_Am: data.da,
         Do_Am_Dat: data.dad
+      })
+      fetch('http://192.168.1.10:3000/', {
+        method: 'GET'
+      })
+        .then(response => response.json())
+        .then((responseJson) => {
+          this.setState({
+            datadevice: responseJson,
+            switchValueMB: responseJson.switchValueMB,
+            switchValueLED: responseJson.switchValueLED,
+          });
+        })
+    })
+    this.socket.on('send-docao', function (data) {
+      e.setState({
+        phantram_conlai: data
       })
     })
 
@@ -95,17 +111,47 @@ class HomePage extends Component {
   onFooterLinkPress = () => {
     this.props.navigation.navigate("Static")
   }
-  
+  componentDidMount() {
+    fetch('http://192.168.1.10:3000/', {
+      method: 'GET'
+    })
+      .then(response => response.json())
+      .then((responseJson) => {
+        this.setState({
+          datadevice: responseJson,
+          switchValueMB: responseJson.switchValueMB,
+          switchValueLED: responseJson.switchValueLED,
+        });
+      })
+  }
+  checkSTT() {
+    if (this.state.switchValueMB == false) {
+      sttmaybom = 'Tắt'
+    } if (this.state.switchValueMB == true) {
+      sttmaybom = 'Bật'
+    } if (this.state.switchValueLED == false) {
+      sttden = 'Tắt'
+    } if (this.state.switchValueLED == true) {
+      sttden = 'Bật'
+    }
+
+  }
 
   render() {
+    this.checkSTT()
+    console.log(this.state.userLogin)
     return (
       <Container style={styles.container}>
+        <Row style={{ marginTop: 25 }}>
+          <Text>Xin Chào, </Text>
+    <Text style={{ fontWeight: 'bold' }}>{this.state.userLogin}</Text>
+        </Row>
         <Card style={styles.card}>
           <CardItem header bordered>
             <Text>Mực nước còn lại</Text>
           </CardItem>
           <CardItem bordered>
-            <Text>{this.state.Do_Am + '%'}</Text>
+            <Text>{this.state.phantram_conlai + '%'}</Text>
           </CardItem>
           <CardItem footer bordered>
           </CardItem>
@@ -118,13 +164,11 @@ class HomePage extends Component {
             <Text>{this.state.Nhiet_Do + '°C'}</Text>
           </CardItem>
           <CardItem footer bordered>
-            <Row style={{ justifyContent: 'space-between' }}>
-              <Row style={{ alignItems: 'center' }}>
-                <Text style={{ color: '#000000' }}>Mái Che</Text>
+            <Row style={{ justifyContent: 'space-around' }}>
+              <Row style={{ alignItems: 'center', justifyContent: 'space-around' }}>
+                <Text style={{ color: '#000000' }}>Đèn</Text>
+                <Text style={{ color: '#000000' }}>{sttden}</Text>
               </Row>
-              <Button transparent light onPress={() => this.onFooterLinkPress()}>
-                <Image source={require('../assets/other/chart.png')} style={{ height: 20, width: 20 }} />
-              </Button>
             </Row>
           </CardItem>
         </Card>
@@ -136,13 +180,11 @@ class HomePage extends Component {
             <Text>{this.state.Do_Am_Dat}%</Text>
           </CardItem>
           <CardItem footer bordered>
-            <Row style={{ justifyContent: 'space-between' }}>
-              <Row style={{ alignItems: 'center' }}>
+            <Row style={{ justifyContent: 'space-around' }}>
+              <Row style={{ alignItems: 'center', justifyContent: 'space-around' }}>
                 <Text style={{ color: '#000000' }}>Máy Bơm</Text>
+                <Text style={{ color: '#000000' }}>{sttmaybom}</Text>
               </Row>
-              <Button transparent light onPress={() => this.onFooterLinkPress()}>
-                <Image source={require('../assets/other/chart.png')} style={{ height: 20, width: 20 }} />
-              </Button>
             </Row>
           </CardItem>
         </Card>
