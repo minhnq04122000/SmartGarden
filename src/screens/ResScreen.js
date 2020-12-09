@@ -13,6 +13,8 @@ import {
     Item,
     Label
 } from 'native-base';
+import { URLSearchParams } from "react-native/Libraries/Blob/URL";
+
 import io from 'socket.io-client';
 
 var e;
@@ -25,7 +27,7 @@ class ResScreen extends Component {
         e = this;
 
         //socket
-        this.socket = io('http://192.168.0.104:3000/', {
+        this.socket = io('http://192.168.1.27:3000/', {
             transports: ['websocket'], jsonp: false
         });
         this.socket.connect();
@@ -37,8 +39,10 @@ class ResScreen extends Component {
         }
 
     }
+    onFooterLinkPress = () => {
+        this.props.navigation.navigate('Login')
+    }
     onRegisterPress() {
-
         var user = {
             username: this.state.username,
             password: this.state.password,
@@ -53,8 +57,7 @@ class ResScreen extends Component {
             alert('Password Không Trùng Nhau')
         } else if (user.password.length < 8 || user.repass.length < 8) {
             alert('Password phải lớn hơn 8 ký tự')
-        }
-        else {
+        } else {
             let stt = 0;
             for (let index = 0; index < this.state.ArrUser.length; index++) {
                 const element = this.state.ArrUser[index];
@@ -65,15 +68,25 @@ class ResScreen extends Component {
             if (stt > 0) {
                 alert('Tên Đăng Nhập' + user.username + 'Đã Tồn Tại, Vui Lòng Nhập Tên Khác')
             } else if (stt <= 0) {
-                alert('Đăng ký thành công tài khoản : ' + user.username)
-                this.props.navigation.navigate('Login')
+                Alert.alert(
+                    "Thông Báo",
+                    "Đăng ký thành công tài khoản " + user.username,
+                    [
+                        {
+                            text: "Cancel",
+                            style: "cancel"
+                        },
+                        { text: "OK", onPress: () => this.onFooterLinkPress() }
+                    ],
+                    { cancelable: false }
+                );
                 this.socket.emit('client-send-user', user)
             }
         }
 
     }
     componentDidMount() {
-        fetch('http://192.168.0.104:3000/Alluser')
+        fetch('http://192.168.1.27:3000/Alluser')
             .then(response => response.json())
             .then(data => {
                 this.setState({

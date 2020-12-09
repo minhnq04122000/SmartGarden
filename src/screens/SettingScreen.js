@@ -30,17 +30,19 @@ export default class SettingScreen extends Component {
     constructor(props) {
         super(props);
         e = this;
-        this.socket = io('http://192.168.1.10:3000/', {
+        this.socket = io('http://192.168.1.27:3000/', {
             transports: ['websocket'], jsonp: false
         });
         this.socket.connect();
         this.state = {
             datadevice: {},
-            switchValueMB: Boolean,
+            switchValueMBL: Boolean,
+            switchValueMBD: Boolean,
             switchValueLED: Boolean,
             switchValueSTT: Boolean,
             sttled: '',
-            sttmb: '',
+            sttmbl: '',
+            sttmbd: '',
             ndtuoiAT: '',
             datuoiATmin: '',
             datuoiATmax: '',
@@ -56,9 +58,9 @@ export default class SettingScreen extends Component {
                 sttled: data
             })
         })
-        this.socket.on('sv-send-sttmb', function (data) {
+        this.socket.on('sv-send-sttmbl', function (data) {
             e.setState({
-                sttmb: data
+                sttmbl: data
             })
         })
         this.socket.on('send-mn', function (data) {
@@ -91,7 +93,7 @@ export default class SettingScreen extends Component {
     }
     SENDCHIEUCAOBE() {
         this.socket.emit('client-send-chieucaobe', this.state.chieucaobe)
-        fetch('http://192.168.1.10:3000/', {
+        fetch('http://192.168.1.27:3000/', {
             method: 'GET'
         })
             .then(response => response.json())
@@ -104,7 +106,7 @@ export default class SettingScreen extends Component {
     }
     SENDNHIETDOAUTO() {
         this.socket.emit('client-send-ndtuoiAT', this.state.ndtuoiAT)
-        fetch('http://192.168.1.10:3000/', {
+        fetch('http://192.168.1.27:3000/', {
             method: 'GET'
         })
             .then(response => response.json())
@@ -123,7 +125,7 @@ export default class SettingScreen extends Component {
         if (this.state.datuoiATmin.length > 0 || this.state.datuoiATmax.length > 0) {
             this.socket.emit('client-send-datuoiAT', doamAT)
         }
-        fetch('http://192.168.1.10:3000/', {
+        fetch('http://192.168.1.27:3000/', {
             method: 'GET'
         })
             .then(response => response.json())
@@ -135,7 +137,7 @@ export default class SettingScreen extends Component {
     }
     SENDMUCNUOC() {
         this.socket.emit('client-send-mucnuoc', this.state.mucnuoc)
-        fetch('http://192.168.1.10:3000/', {
+        fetch('http://192.168.1.27:3000/', {
             method: 'GET'
         })
             .then(response => response.json())
@@ -145,12 +147,27 @@ export default class SettingScreen extends Component {
                 });
             })
     }
-    _handleToggleSwitchMB = () => {
+    _handleToggleSwitchMBL = () => {
         this.setState({
-            switchValueMB: !this.state.switchValueMB
+            switchValueMBL: !this.state.switchValueMBL
         })
-        this.socket.emit('client-send-MB', !this.state.switchValueMB)
-        fetch('http://192.168.1.10:3000/', {
+        this.socket.emit('client-send-MBL', !this.state.switchValueMBL)
+        fetch('http://192.168.1.27:3000/', {
+            method: 'GET'
+        })
+            .then(response => response.json())
+            .then((responseJson) => {
+                this.setState({
+                    datadevice: responseJson
+                });
+            })
+    }
+    _handleToggleSwitchMBD = () => {
+        this.setState({
+            switchValueMBD: !this.state.switchValueMBD
+        })
+        this.socket.emit('client-send-MBD', !this.state.switchValueMBD)
+        fetch('http://192.168.1.27:3000/', {
             method: 'GET'
         })
             .then(response => response.json())
@@ -165,7 +182,7 @@ export default class SettingScreen extends Component {
             switchValueLED: !this.state.switchValueLED
         })
         this.socket.emit('client-send-STTLED', !this.state.switchValueLED)
-        fetch('http://192.168.1.10:3000/', {
+        fetch('http://192.168.1.27:3000/', {
             method: 'GET'
         })
             .then(response => response.json())
@@ -181,7 +198,7 @@ export default class SettingScreen extends Component {
             switchValueSTT: !this.state.switchValueSTT,
         })
         this.socket.emit('client-send-stt', !this.state.switchValueSTT)
-        fetch('http://192.168.1.10:3000/', {
+        fetch('http://192.168.1.27:3000/', {
             method: 'GET'
         })
             .then(response => response.json())
@@ -198,14 +215,15 @@ export default class SettingScreen extends Component {
     }
 
     componentDidMount() {
-        fetch('http://192.168.1.10:3000/', {
+        fetch('http://192.168.1.27:3000/', {
             method: 'GET'
         })
             .then(response => response.json())
             .then((responseJson) => {
                 this.setState({
                     datadevice: responseJson,
-                    switchValueMB: responseJson.switchValueMB,
+                    switchValueMBL: responseJson.switchValueMBL,
+                    switchValueMBD: responseJson.switchValueMBD,
                     switchValueLED: responseJson.switchValueLED,
                     switchValueSTT: responseJson.switchValueSTT
                 });
@@ -322,12 +340,24 @@ export default class SettingScreen extends Component {
                     <View style={{ marginLeft: 40, marginRight: 40, marginBottom: 40 }}>
                         <Row style={{ alignItems: 'center', justifyContent: 'space-around' }}>
                             <Row>
-                                <Text style={{ color: '#000000' }}>Máy Bơm : </Text>
-                                <Text style={{ color: '#000000', fontWeight: 'bold' }}>{this.state.sttmb}</Text>
+                                <Text style={{ color: '#000000' }}>Máy Bơm Lá : </Text>
+                                <Text style={{ color: '#000000', fontWeight: 'bold' }}>{this.state.sttmbl}</Text>
                             </Row>
                             <Switch
-                                onValueChange={this._handleToggleSwitchMB}
-                                value={this.state.switchValueMB}
+                                onValueChange={this._handleToggleSwitchMBL}
+                                value={this.state.switchValueMBL}
+                            />
+                        </Row>
+                    </View>
+                    <View style={{ marginLeft: 40, marginRight: 40, marginBottom: 40 }}>
+                        <Row style={{ alignItems: 'center', justifyContent: 'space-around' }}>
+                            <Row>
+                                <Text style={{ color: '#000000' }}>Máy Bơm Đất : </Text>
+                                <Text style={{ color: '#000000', fontWeight: 'bold' }}>{this.state.sttmbd}</Text>
+                            </Row>
+                            <Switch
+                                onValueChange={this._handleToggleSwitchMBD}
+                                value={this.state.switchValueMBD}
                             />
                         </Row>
                     </View>

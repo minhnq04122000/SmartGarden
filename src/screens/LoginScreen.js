@@ -13,13 +13,17 @@ import {
   Item,
   Label
 } from 'native-base';
-import { firebaseApp } from '../components/FirebaseConfig';
+import io from 'socket.io-client';
 
 // const [value, onChangeText] = useState('Useless Placeholder');
 
 class LoginScreen extends Component {
   constructor(props) {
     super(props);
+    this.socket = io('http://192.168.1.27:3000/', {
+      transports: ['websocket'], jsonp: false
+    });
+    this.socket.connect();
     this.state = {
       ArrUser: [],
       username: '',
@@ -27,6 +31,16 @@ class LoginScreen extends Component {
       uid: '',
       usersRef: '',
     }
+    fetch('http://192.168.1.27:3000/Alluser')
+      .then(response => response.json())
+      .then(data => {
+        this.setState({
+          ArrUser: data
+        })
+        console.log(data)
+      }).catch((error) => {
+        console.error(error);
+      });
   }
   onFooterLinkPress = () => {
     this.props.navigation.navigate('Res')
@@ -55,20 +69,12 @@ class LoginScreen extends Component {
       } else {
         alert('Không Tìm Thấy Tài Khoản')
       }
-      if(statuspass>0){
+      if (statuspass > 0) {
         alert('Mật Khẩu Không Đúng, Vui Lòng Thử Lại')
       }
     }
   }
-  componentDidMount() {
-    fetch('http://192.168.0.104:3000/Alluser')
-      .then(response => response.json())
-      .then(data => {
-        this.setState({
-          ArrUser: data
-        })
-      })
-  }
+
   render() {
     return (
       <View style={styles.container}>
